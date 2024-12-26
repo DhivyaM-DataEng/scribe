@@ -9,6 +9,8 @@ export const NoteContext = createContext<NoteContextType>({
   [NoteTextNames.NOTE]: '',
   [NoteTextNames.SOAP]: '',
   [NoteTextNames.HANDOUT]: '',
+  isGeneratingClinicalNote: false,
+  isGeneratingPatientHandout: false,
   updateStartTime: () => {},
   updateEndTime: () => {},
   updateSelectedLanguage: () => {},
@@ -16,6 +18,8 @@ export const NoteContext = createContext<NoteContextType>({
   addNoteText: () => {},
   updateSoapText: () => {},
   updateHandoutText: () => {},
+  updateIsGeneratingClinicalNote: () => {},
+  updateIsGeneratingPatientHandout: () => {},
   clearAllText: () => {},
 });
 
@@ -40,6 +44,8 @@ export default function NoteContextProvider({
   const [noteText, setNoteText] = useState('');
   const [soapText, setSoapText] = useState('');
   const [handoutText, setHandoutText] = useState('');
+  const [isGeneratingClinicalNote, setIsGeneratingClinicalNote] = useState(false);
+  const [isGeneratingPatientHandout, setIsGeneratingPatientHandout] = useState(false);
 
   const updateSelectedLangauge = (newLanguage: SupportedLanguages) => {
     setSelectedLanguage(() => newLanguage);
@@ -71,6 +77,14 @@ export default function NoteContextProvider({
     setHandoutText(() => newHandoutText);
   };
 
+  const updateIsGeneratingClinicalNote = (newState: boolean) => {
+    setIsGeneratingClinicalNote(() => newState);
+  };
+
+  const updateIsGeneratingPatientHandout = (newState: boolean) => {
+    setIsGeneratingPatientHandout(() => newState);
+  };
+
   const clearAllText = () => {
     setNoteText('');
     setSoapText('');
@@ -84,6 +98,8 @@ export default function NoteContextProvider({
     [NoteTextNames.NOTE]: noteText,
     [NoteTextNames.SOAP]: soapText,
     [NoteTextNames.HANDOUT]: handoutText,
+    isGeneratingClinicalNote,
+    isGeneratingPatientHandout,
     updateSelectedLanguage: updateSelectedLangauge,
     updateStartTime: updateStartTime,
     updateEndTime: updateEndTime,
@@ -91,6 +107,8 @@ export default function NoteContextProvider({
     addNoteText: addNoteText,
     updateSoapText: updateSoapText,
     updateHandoutText: updateHandoutText,
+    updateIsGeneratingClinicalNote: updateIsGeneratingClinicalNote,
+    updateIsGeneratingPatientHandout: updateIsGeneratingPatientHandout,
     clearAllText: clearAllText,
   };
 

@@ -1,8 +1,6 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { type ReactNode, createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk';
-
-import { NoteContext } from '@/context/note-context/NoteContext';
 
 import {
   Microphone,
@@ -10,9 +8,23 @@ import {
   MicrophoneProperties,
   createSpeechTranscriber,
   enumerateMicrophones,
-} from '../utils/speech';
+} from '@/utils/speech';
 
-export default function useDictation() {
+import { NoteContext } from '../note-context/NoteContext';
+import { DictationContextType } from './types';
+
+export const DictationContext = createContext<DictationContextType>({
+  currentText: '',
+  microphones: [],
+  selectedMic: '',
+  isTranscribing: false,
+  startContinuousDictation: () => {},
+  stopDictation: () => {},
+  updateSelectedMic: () => {},
+  getMicrophones: () => {},
+});
+
+export default function DictationContextProvider({ children }: { children: ReactNode }) {
   const { selectedLanguage, updateStartTime, updateEndTime, addNoteText, clearAllText } =
     useContext(NoteContext);
 
@@ -162,7 +174,7 @@ export default function useDictation() {
     setSelectedMic(() => newMic);
   };
 
-  return {
+  const dictationCtx = {
     currentText,
     microphones,
     selectedMic,
@@ -172,4 +184,6 @@ export default function useDictation() {
     updateSelectedMic,
     getMicrophones,
   };
+
+  return <DictationContext.Provider value={dictationCtx}>{children}</DictationContext.Provider>;
 }

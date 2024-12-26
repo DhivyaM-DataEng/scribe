@@ -16,6 +16,8 @@ export interface NoteContextType {
   [NoteTextNames.NOTE]: string;
   [NoteTextNames.SOAP]: string;
   [NoteTextNames.HANDOUT]: string;
+  isGeneratingClinicalNote: boolean;
+  isGeneratingPatientHandout: boolean;
   updateSelectedLanguage: (_value: SupportedLanguages) => void;
   updateStartTime: (_value: Date) => void;
   updateEndTime: (_value: Date) => void;
@@ -23,5 +25,7 @@ export interface NoteContextType {
   addNoteText: (_value: string) => void;
   updateSoapText: (_value: string) => void;
   updateHandoutText: (_value: string) => void;
+  updateIsGeneratingClinicalNote: (_value: boolean) => void;
+  updateIsGeneratingPatientHandout: (_value: boolean) => void;
   clearAllText: () => void;
 }

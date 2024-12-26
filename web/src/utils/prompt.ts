@@ -1,13 +1,21 @@
 import axios from 'axios';
 
 import config from '@/services/config';
+import { AvailableNoteTemplateNames } from '@/types';
 
-async function generateSOAPNotes(
-  transcription: string,
-  language: string,
-  startTime: Date | null,
-  endTime: Date | null,
-): Promise<string> {
+async function generateSOAPNotes({
+  transcription,
+  language,
+  startTime,
+  endTime,
+  template,
+}: {
+  transcription: string;
+  language: string;
+  startTime: Date | null;
+  endTime: Date | null;
+  template: AvailableNoteTemplateNames;
+}): Promise<string> {
   if (transcription === undefined || transcription === null || transcription === '') return '';
 
   try {
@@ -16,6 +24,7 @@ async function generateSOAPNotes(
       {
         transcription: transcription,
         language: language,
+        template: template,
       },
       {
         headers: {

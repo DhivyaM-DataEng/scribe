@@ -27,6 +27,16 @@ interface UserInfo {
   user_id: string; // User ID
 }
 
+async function sendUserDataToBackend(email: string, email_verified: UserClaim): Promise<void>{
+  try{
+    const response = await axios.post('/api/user-data', {email, email_verified});
+    console.log('data sent to backend', response.data)
+  } catch (err) {
+    console.error("Error sending the user data to backend", err)
+    
+  }
+}
+
 function App() {
   useEffect(() => {
     const fetchUserData = async (): Promise<UserInfo | null> => {
@@ -34,9 +44,13 @@ function App() {
         const response = await axios.get<UserInfo[]>('/.auth/me', {
           withCredentials: true, // Ensures cookies are sent for authentication
         });
+        const email = response.data[0]["user_id"]
+        const email_verified = response.data[0]["user_claims"][5]
+        console.log(email, " ", email_verified)
 
         if (response.status === 200 && response.data.length > 0) {
           console.log('user info: ', response.data);
+          await sendUserDataToBackend(email, email_verified)
           return response.data[0]; // Return the first user info object
         } else {
           console.error('No user data available:', response.data);

@@ -23,6 +23,18 @@ def status():
     status = [ { 'status': 'healthy' } ]
     return jsonify(status)
 
+@app.route('/api/user-data', methods=['POST'])
+def receive_user_data():
+    try:
+        data = request.json
+        email= data.get('email')
+        email_verified = data.get('email_verified')
+
+        print(F"Received user data - Email: {email}, Verified: {email_verified}")
+        return jsonify({"message":"User data received successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
 ###
 # Get the speech token from the Azure Speech Service
 ###

@@ -1,9 +1,10 @@
 import os, requests
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, session
 from dotenv import load_dotenv
 from flask_cors import CORS
 from notes import send_transcription_to_prompty, send_note_to_prompty
+from functools import wraps
 
 # Load environment variables from .env file
 load_dotenv(override=True)
@@ -31,14 +32,30 @@ def receive_user_data():
         email_verified = data.get('email_verified')
 
         print(F"Received user data - Email: {email}, Verified: {email_verified}")
+        # Store user data in session
+        session['user_email'] = email
+        session['email_verified'] = email_verified
+
         return jsonify({"message":"User data received successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
+
+def require_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'user_email' not in session or 'email_verified' not in session:
+            return jsonify({"error": "Authentication required"}), 401
+        if not session['email_verified']:
+            return jsonify({"error": "Email not verified"}), 403
+        return f(*args, **kwargs)
+    return decorated
 
 ###
 # Get the speech token from the Azure Speech Service
 ###
 @app.route('/api/get-speech-token', methods=['GET'])
+@require_auth
 def get_speech_token():
     speech_key = os.getenv('SPEECH_KEY')
     speech_region = os.getenv('SPEECH_REGION')
@@ -63,6 +80,7 @@ def get_speech_token():
 ## Run Prompty OpenAPI: summarize transcription of conversation
 ###
 @app.route('/api/generate-doc', methods=['POST'])
+@require_auth
 def generate_doc():
 
     try:
@@ -79,6 +97,7 @@ def generate_doc():
 ## Run Prompty OpenAPI: generate handout from SOAP note
 ###
 @app.route('/api/generate-handout', methods=['POST'])
+@require_auth
 def generate_handout():
 
     try:
@@ -92,4 +111,12 @@ def generate_handout():
         return str(e), 400
 
 if __name__ == '__main__':
-   app.run(debug=True, port=8000, host='0.0.0.0')
+    app.config['SESSION_COOKIE_SECURE'] = True  # For HTTPS
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.run(debug=True, port=8000, host='0.0.0.0')
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({"message": "Logged out successfully"}), 200
